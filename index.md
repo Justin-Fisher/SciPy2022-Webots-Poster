@@ -1,9 +1,12 @@
 # A New Python API for Webots Robotic Simulations
 ## Prof. Justin C. Fisher, Southern Methodist University
 
-Webots is a popular open-source package for 3D robotics simulations.
-It can also be used as a 3D interactive environment for other physics-based modeling, virtual reality, teaching or games. Webots has provided a simple API allowing Python programs to control robots and/or the simulated world, but this API is inefficient and does not provide many "pythonic" conveniences.
-A new Python API for Webots is presented that is more efficient and provides a more intuitive, easily usable, and "pythonic" interface.
+## Overview.
+1. Webots is a popular open-source package for 3D robotics simulations.  It can also be used as a 3D interactive environment for other physics-based modeling, virtual reality, teaching or games. (See the first video below for an intro to Webots!)
+2. A new Python API for Webots is presented that is more efficient and provides a more intuitive, easily usable, and "pythonic" interface than the simple Python API that has historically been included with Webots.  (See the bullet-list below for some of the features and conveniences of this new API.)
+3. The history of this new API is presented including its development for an undergraduate Cognitive Science course called Minds, Brains, and Robotics.  (See the second video below of a fun robot race activity for this class.)
+4. Some design decisions are discussed, which likely parallel challenges that other developers face.
+5. Some readability metrics are provided to support the claim that the new API is much more readable than the old.
 
 ## 1. About Webots
 
@@ -73,43 +76,25 @@ This may help give the reader a better understanding of this API, and also of re
 
 ### 4.1. Shifting from functions to properties.
 The old Python API for Webots consists largely of methods like `motor.getVelocity()` and `motor.setVelocity(new_velocity)`.
-In the new API these have quite uniformly been changed to Python properties, so these purposes are now accomplished with :code:`motor.velocity` and :code:`motor.velocity = new_velocity`.
+In the new API these have quite uniformly been changed to Python properties, so these purposes are now accomplished with `motor.velocity` and `motor.velocity = new_velocity`.
 
-Reduction of wordiness and punctuation helps to make programs easier to read and to understand, and it reduces the cognitive load on coders.
-However, there are also drawbacks.
+* Advantages: Reduction of wordiness and punctuation helps to make programs easier to read and to understand, and it reduces the cognitive load on coders.
+* Drawback #1.  Properties can give the mistaken impression that some attributes are computationally cheap to get or set. In cases where this impression would be misleading, more traditional method calls were retained and/or the comparative expense of the operation was clearly documented.
+* Drawback #2. Inviting ordinary users to assign properties to API objects might lead them to assign other attributes that could cause problems.
+* Drawback #3. Python debugging provides direct feedback in cases where a user misspells `motor.setFoo(v)` but not when someone mispells 'motor.foo = v`.  If a user inadvertently types `motor.setFool(v)` they will get an `AttributeError` noting that `motor` lacks a `setFool` attribute.  But if a user inadvertently types `motor.fool = v`, then Python will silently create a new `.fool` attribute for `motor` and the user will often have no idea what has gone wrong.
 
-One drawback is that properties can give the mistaken impression that some attributes are computationally cheap to get or set.
-In cases where this impression would be misleading, more traditional method calls were retained and/or the comparative expense of the operation was clearly documented.
+Our solution: Robot devices like motors and cameras employ a blanket `__setattr__` that will generate warnings if non-property attributes of devices are set from outside the module.
 
-Two other drawbacks are related.
-One is that inviting ordinary users to assign properties to API objects might lead them to assign other attributes that could cause problems.
-Since Python lacks true privacy protections, it has always faced this sort of worry, but this worry becomes even worse when users start to feel familiar moving beyond just using defined methods to interact with an object.
-
-Relatedly, Python debugging provides direct feedback in cases where a user misspells `motor.setFoo(v)` but not when someone mispells 'motor.foo = v`.  If a user inadvertently types `motor.setFool(v)` they will get an `AttributeError` noting that `motor` lacks a `setFool` attribute.
-But if a user inadvertently types `motor.fool = v`, then Python will silently create a new `.fool` attribute for `motor` and the user will often have no idea what has gone wrong.
-
-These two drawbacks both involve users setting an attribute they shouldn't: either an attribute that has another purpose, or one that doesn't.
-Defenses against the first include "hiding" important attributes behind a leading "_", or protecting them with a Python property, which can also help provide useful doc-strings.
-Unfortunately it's much harder to protect against misspellings in this piece-meal fashion.
-
-This led to the decision to have robot devices like motors and cameras employ a blanket `__setattr__` that will generate warnings if non-property attributes of devices are set from outside the module.
-So the user who inadvertently types `motor.fool = v` will immediately be warned of their mistake.
-This does incur a performance cost, but that cost is often worthwhile when it saves development time and frustration.
-For cases when performance is crucial, and/or a user wants to live dangerously and meddle inside API objects, this layer of protection can be deactivated.
-
-An alternative approach, suggested by Matthew Feickert, would have been to use `__slots__` rather than an ordinary `__dict__` to store device attributes, which would also have the effect of raising an error if users attempt to modify unexpected attributes.  Not having a `__dict__` can make it harder to do some things like cached properties and multiple inheritance.  But in cases where such issues don't arise or can be worked around, readers facing similar challenges may find `__slots__` to be a preferable solution.
+An alternative solution:  use `__slots__` rather than an ordinary `__dict__` to store device attributes, which would also have the effect of raising an error if users attempt to modify unexpected attributes.  Not having a `__dict__` can make it harder to do some things like cached properties and multiple inheritance.  But in cases where such issues don't arise or can be worked around, readers facing similar challenges may find `__slots__` to be a preferable solution.
 
 ### 4.2 Backwards Compatibility.
-The new API offers many new ways of doing things, many of which would seem "better" by most metrics, with the main drawback being just that they differ from old ways.
-The possibility of making a clean break from the old API was considered, but that would stop old code from working, alienate veteran users, and risk causing a schism akin to the deep one that arose between Python 2 and Python 3 communities when Python 3 opted against backwards compatibility.
+The new API offers many new ways of doing things, many of which would seem "better" by most metrics, with the main drawback being just that they differ from old ways.  We considered three options.
 
-Another option would have been to refrain from adding a "new-and-better" feature to avoid introducing redundancies or backward incompatibilities.
-But that has obvious drawbacks too.
+1. **Make a clean break?** The possibility of making a clean break from the old API was considered, but that would stop old code from working, alienate veteran users, and risk causing a schism akin to the deep one that arose between Python 2 and Python 3 communities when Python 3 opted against backwards compatibility.
 
-Instead, a compromise was typically adopted: to provide both the "new-and-better" way and the "worse-old" way.
-This redundancy was eased by shifting from `getFoo` / :code:`setFoo` methods to properties, and from `CamelCase` to pythonic :code:`snake_case`, which reduced the number of name collisions between old and new.
-Employing the "worse-old" way leads to a deprecation warning that includes helpful advice regarding shifting to the "new-and-better" way of doing things.
-This may help users to transition more gradually to the new ways, or they can shut these warnings off to help preserve good will, and hopefully avoid a schism.
+2. **Just stick with the "worse old" ways?** This has obvious drawbacks.
+
+3. **Compromise?** We usually opted to support both, but the "worse old" way generates (optional) deprecation warnings that provide guidance for shifting to the "new and better way". This involves (temporary) redundancy but hopefully will help ease the transition.
 
 ### 4.3 Separating `robot` and `world`.
 ===============================================
@@ -117,20 +102,22 @@ In Webots there is a distinction between "ordinary robots" whose capabilities ar
 In the old API, supervisor controller programs import a `Supervisor` subclass of `Robot`, but typically still call this unusually powerful robot `robot`, which has led to many confusions.
 
 In the new API these two sorts of powers are strictly separated.
-Importing `robot` provides an object that can be used to control the devices in the robot itself.
-Importing `world` provides an object that can be used to observe and enact changes anywhere in the simulated world (presuming that the controller has such permissions, of course).
-In many use cases, supervisor robots don't actually have bodies and devices of their own, and just use their supervisor powers incorporeally, so all they will need is `world`.
+
+* Importing `robot` provides an object that can be used to control the devices in the robot itself.
+* Importing `world` provides an object that can be used to observe and enact changes anywhere in the simulated world (presuming that the controller has such permissions, of course).
+
 In the case where a robot's controller wants to exert both forms of control, it can import both `robot` to control its own body, and `world` to control the rest of the world.
 
 This distinction helps to make things more intuitively clear.
 It also frees `world` from having all the properties and methods that `robot` has, which in turn reduces the risk of name-collisions as `world` takes on the role of serving as the root of the proxy scene tree.
 In the new API, `world.children` refers to the `children` field of the root of the scene tree which contains (almost) all of the simulated world, `world.WorldInfo` refers to one of these children, a `WorldInfo` node, and `world.ROBOT2` dynamically returns a node within the world whose Webots DEF-name is "ROBOT2".
-These uses of `world` would have been much less intuitive if users thought of `world` as being a special sort of robot, rather than as being their handle on controlling the simulated world.
 Other sorts of supervisor functionality also are very intuitively associated with `world`, like `world.save(filename)` to save the state of the simulated world, or `world.mode = 'PAUSE'`.
 
 Having `world.attributes` dynamically fetch nodes and fields from the scene tree did come with some drawbacks.
 There is a risk of name-collisions, though these are rare since Webots field-names are known in advance, and nodes are typically sought by ALL-CAPS DEF-names, which won't collide with `world` 's lower-case and MixedCase attributes.
 Linters like MyPy and PyCharm also cannot anticipate such dynamic references, which is unfortunate, but does not stop such dynamic references from being extremely useful.
+
+## 5. Readability Metrics
 
 
 :

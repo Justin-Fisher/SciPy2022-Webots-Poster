@@ -6,13 +6,15 @@
 2. A new Python API for Webots is presented that is more efficient and provides a more intuitive, easily usable, and "pythonic" interface than the simple Python API that has historically been included with Webots.  (See the bullet-list below for some of the features and conveniences of this new API.)
 3. The history of this new API is presented including its development for an undergraduate Cognitive Science course called Minds, Brains, and Robotics.  (See the second video below of a fun robot race!)
 4. Some design decisions are discussed, which likely parallel challenges that other developers face.
-5. Some readability metrics are provided to support the claim that the new API is much more readable than the old.
+5. Some readability metrics are provided to support the claim that the new API is much more readable than the old.  Across the board, code written in the new API receives "better" scores than equivalent code written in the old.
 
 ## Quick Links.
 
 **Download Webots:**  https://cyberbotics.com/
 
 **The new Python API:**  https://github.com/Justin-Fisher/new_python_api_for_webots
+
+**Contact:** fisher at smu dot edu
 
 ## 1. About Webots
 
@@ -126,10 +128,99 @@ Linters like MyPy and PyCharm also cannot anticipate such dynamic references, wh
 
 ## 5. Readability Metrics
 
+A main advantage of the new API is that it allows Webots controllers to be written in a manner that is easier for coders to read, write, and understand.
+Qualitatively, this difference becomes quite apparent upon a cursory inspection of examples like the one given in section 1.
+As another representative example, here are three lines from Webots' included `supervisor_draw_trail` sample as they would appear in the old Python API:
 
-:
-:
-:
+```python
+    trail_node = world.getFromDef("TRAIL")
+    point_field = trail_node.getField("coord").getSFNode().getField("point")
+    index_field = trail_node.getField("coordIndex")
+```
 
+And here is their equivalent in the new API:
 
+```python
+    point_field = world.TRAIL.coord.point
+    index_field = world.TRAIL.coordIndex
+```
 
+Brief inspection should reveal that the latter code is much easier to read, write and understand, not just because it is shorter, but also because its punctuation is limited to standard Python syntax for traversing attributes of objects, because it reduces the need to introduce new variables like `trail_node` for things that it already makes easy to reference (via `world.TRAIL`, which the new API automatically caches for fast repeat reference), and because it invisibly handles selecting appropriate C-API functions like `getField` and `getSFNode`, saving the user from needing to learn and remember all these functions (of which there are many).
+
+### 5.1 Length and Cyclomatic Complexity
+
+This intuitive impression is confirmed by automated metrics for code readability.
+The measures in what follows consider the full `supervisor_draw_trail` sample controller (from which the above snippet was drawn), since this is the Webots sample controller that makes the most sustained use of supervisor functionality to perform a fairly plausible supervisor task (maintaining the position of a streamer that trails behind the robot).
+Webots provides this sample controller in C, but it was re-implemented using both the Old Python API and the New Python API, maintaining straightforward correspondence between the two, with the only differences being directly due to the differences in the API's.
+(Sample code and computations of metrics are available under additional information below.[*** Rephrase as references])
+
+**Table 1: Length and Complexity Metrics.**
+
+  |Metric                                                 | New API     | Old API      |
+  | ----------------------------------------------------- | ----------- | ------------ |
+  |Lines of Code (including blanks, comments)             |  43         | 49           |
+  |Source Lines of Code (excluding blanks, comments)      |  29         | 35           |
+  |Logical Lines of Code (single commands)                |  27         | 38           |
+  |Cyclomatic Complexity                                  | 5 (Grade A) | 8 (Grade B)  |
+
+Some raw measures for the two controllers are shown in Table 1.
+These were gathered using the Radon code-analysis tools.
+Multiple metrics are reported because theorists disagree about which are most relevant in assessing code readability, because some of these play a role in computing other metrics discussed below, and because this may help to allay potential worries that a few favorable metrics might have been cherry-picked.
+
+The "lines of code" measures reflect that the new API makes it easier to do more things with less code.  Line counts can be misleading, especially when the code with fewer lines has longer lines, though upcoming measures will show that that is not the case here.
+
+Cyclomatic Complexity counts the number of potential branching points that appear within the code, like `if`, `while` and `for`. [McC01] Cyclomatic Complexity is strongly correlated with other plausible measures of code readability involving indentation structure. [Hin01]
+The new API's score is lower/"better" due to its automatically converting vector-like values to the format needed for importing new nodes into the Webots simulation, and due to its automatic caching allowing a simpler loop to remove unwanted nodes.
+By Radon's reckoning this difference in complexity already gives the old API a "B" grade, as compared to the new API's "A".
+
+### 5.2 Halstead Metrics
+
+Another collection of classic measures of code readability was developed by Halstead. [Hal01]
+These measures (especially volume) have been shown to correlate with human assessments of code readability [Bus01] [Pos01].
+These measures generally penalize a program for using a "vocabulary" involving more operators and operands. Table :ref:`halsteadtable` shows these metrics, as computed by Radon.
+(Again all measures are reported, while remaining neutral about which are most significant.)
+The new API scores significantly lower/"better" on these metrics, due in large part to its automatically selecting among many different C-API calls without these needing to appear in the user's code.
+E.g. having `motor.velocity` as a unified property involves fewer unique names than having users write both `setVelocity()` and `getVelocity()`, and often forming a third local `velocity` variable.
+And having `world.children[-1]` access the last child that field in the simulation saves having to count `getField`, and `getMFNode` in the vocabulary, and often also saves forming additional local variables for nodes or fields gotten in this way.
+Both of these factors also help the new API to greatly reduce parentheses counts.
+
+**Table 2: Halstead Metrics.**
+
+  |Halstead Metric                                         |  New API   |  Old API     |
+  | ------------------------------------------------------ | ---------- | ------------ |
+  |Vocabulary (count of unique (n1)operators+(n2)operands) |  18        |  54          |
+  |Length (count of (N1)operator + (N2)operand instances)  |  38        |  99          |
+  |Volume = Length * log2(Vocabulary)                      |  158       |  570         |
+  |Difficulty = (n1 * N2) / (2 * n2)                       |  4.62      |  4.77        |
+  |Effort = Difficulty * Volume                            |  731       |  2715        |
+  |Time = Effort / 18                                      |  41        |  151         |
+  |Bugs = Volume / 3000                                    |  0.05      |  0.19        |
+
+### 5.3 Maintainability Index
+
+Lastly, the Maintainability Index and variants thereof are intended to measure of how easy to support and change source code is. [Oman01]
+These measures combine Halstead Volume, Source Lines of Code, and Cyclomatic Complexity, all mentioned above, and two variants (SEI and Radon) also provide credit for percentage of comment lines.
+Different versions of this measure weight and curve these factors somewhat differently, but since the new API outperforms the old on each factor, all versions agree that it gets the higher/"better" score, as shown in Table :ref:`maintaintable`.
+(These measures were computed based on the input components as counted by Radon.)
+
+**Table 3: Maintainability Index Metrics.**
+
+  |Maintainability Index version                           |    New API |    Old API   |
+  | ------------------------------------------------------ | ---------- | ------------ |
+  |Original (Oman and Hagemeister) [Oman01]_               |  89        |     79       |
+  |Software Engineering Institute (SEI)                    |  78        |     62       |
+  |Microsoft Visual Studio                                 |  52        |     46       |
+  |Radon                                                   |  82        |     75       |
+
+There are potential concerns about each of these measures of code readability, and one can easily imagine playing a form of "code golf" to optimize some of these scores without actually improving readability (though it would be difficult to do this for all scores at once).
+Fortunately, most plausible measures of readability have been observed to be strongly correllated across ordinary cases, [Pos01] so the clear and unanimous agreement between these measures is a strong confirmation that the new API is indeed more readable.
+Other plausible measures of readability would take into account factors like whether the operands are ordinary English words, [Sca01] or how deeply nested (or indented) the code ends up being, [Hin01] both of which would also favor the new API.
+
+So the mathematics confirm what was likely obvious from visual comparison of code samples above, that the new API is indeed more "readable" than the old.
+
+5. Conclusions
+==============
+
+A new Python API for Webots robotic simulations was presented.
+It more efficiently interfaces directly with the Webots C API and provides a more intuitive, easily usable, and "pythonic" interface for controlling Webots robots and simulations.
+Motivations for the API and some of its design decisions were discussed.  Advantages of the new API were discussed and quantified using automated code readability metrics.

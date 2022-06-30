@@ -1,3 +1,4 @@
+# A New Python API for Webots Robotic Simulations
 ## Prof. Justin C. Fisher, Southern Methodist University
 
 Webots is a popular open-source package for 3D robotics simulations.
@@ -61,6 +62,7 @@ Accomodating those with fewer skills required simplifying many of the complexiti
 It also required setting up tools to use Webots "supervisor" powers to help manipulate the simulated world, e.g. to provide students easier customization options for their robots.
 The old Webots API makes the use of such supervisor powers tedious and difficult, even for experienced coders, so this practically required developing new tools to streamline the process.
 These factors led to the development of an interface that would be much easier for novice students to adapt to, and that would make it much easier for an experienced programmer to make much use of supervisor powers to manipulate the simulated world.
+
 Discussion of this with the core Webots development team then led to the decision to incorporate these improvements into Webots, where they can be of benefit to a much broader community.
 
 ## 4. Design Decisions.

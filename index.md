@@ -1,15 +1,51 @@
-## A New Python API for Webots Robotic Simulations
-### Prof. Justin C. Fisher, Southern Methodist University
+# A New Python API for Webots Robotic Simulations
+## Prof. Justin C. Fisher, Southern Methodist University
 
 Webots is a popular open-source package for 3D robotics simulations.
 It can also be used as a 3D interactive environment for other physics-based modeling, virtual reality, teaching or games. Webots has provided a simple API allowing Python programs to control robots and/or the simulated world, but this API is inefficient and does not provide many "pythonic" conveniences.
 A new Python API for Webots is presented that is more efficient and provides a more intuitive, easily usable, and "pythonic" interface.
 
-### About Webots
+## About Webots
+
+Webots uses the Open Dynamics Engine (ODE), which allows physical simulations of Newtonian bodies, collisions, joints, springs, friction, and fluid dynamics.
+Webots provides the means to simulate a wide variety of robot components, including motors, actuators, wheels, treads, grippers, light sensors, ultrasound sensors, pressure sensors, range finders, radar, lidar, and cameras (with many of these sensors drawing their inputs from GPU processing of the simulation).
+A typical simulation will involve one or more robots, each with somewhere between 3 and 30 moving parts (though more would be possible), each running its own controller program to process information taken in by its sensors to determine what control signals to send to its devices.
+A simulated world typically involves a ground surface (which may be a sloping polygon mesh) and dozens of walls, obstacles, and/or other objects, which may be stationary or moving in the physics simulation.
 
 <p align="center">
 <iframe width="560" height="315" src="https://www.youtube.com/embed/O7U3sX_ubGc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
+
+## Presenting a New Python API for Webots
+
+In qualitative terms, the old API feels like one is awkwardly using Python to call C and C++ functions, whereas the new API feels much simpler, much easier, and like it is fully intended for Python.
+
+* Unlike the old API, the new API contains helpful Python type annotations and docstrings.
+* Webots employs many vectors, e.g., for 3D positions, 4D rotations, and RGB colors.  The old API typically treats these as lists or integers (24-bit colors).  In the new API these are Vector objects, with conveniently addressable components (e.g. `vector.x` or `color.red`), convenient helper methods like `vector.magnitude` and `vector.unit_vector`, and overloaded vector arithmetic operations, akin to (and interoperable with) NumPy arrays.
+* The new API also provides easy interfacing between high-resolution Webots sensors (like cameras and Lidar) and Numpy arrays, to make it much more convenient to use Webots with popular Python packages like Numpy, Scipy, PIL or OpenCV.  For example, converting a Webots camera image to a NumPy array is now as simple as `camera.array` and this now allows the array to share memory with the camera, making this extremely fast regardless of image size.
+* The old API often requires that all function parameters be given explicitly in every call, whereas the new API gives many parameters commonly used default values, allowing them often to be omitted, and keyword arguments to be used where needed.
+* Most attributes are now accessible (and alterable, when applicable) by pythonic properties like `motor.velocity`.
+* Many devices now have Python methods like `__bool__` overloaded in intuitive ways.  E.g., you can now use `if bumper` to detect if a bumper has been pressed, rather than the old `if bumper.getValue()`.
+* Pythonic container-like interfaces are now provided.  You may now use `for target in radar` to iterate through the various targets a radar device has detected or `for packet in receiver` to iterate through communication packets that a receiver device has received (and it now automatically handles a wide variety of Python objects, not just strings).
+* The old API requires supervisor controllers to use a wide variety of separate functions to traverse and interact with the simulation’s scene tree, including different functions for different VRML datatypes (like `SFVec3f` or `MFInt32`). The new API automatically handles these datatypes and translates intuitive Python syntax (like dot-notation and square-bracket indexing) to the Webots equivalents.  E.g., you can now move a particular crate 1 meter in the x direction using a command like `world.CRATES[3].translation += [1,0,0]`. Under the old API, this would require numerous function calls (calling `getNodeFromDef` to find the CRATES node, `getMFNode` to find the child with index 3, `getSFField` to find its translation field, and `getSFVec3f` to retrieve that field’s value, then some list manipulation to alter the x-component of that value, and finally a call to `setSFVec3f` to set the new value).
+
+As another example illustrating how much easier the new API is to use, here are two lines from Webots' sample `supervisor_draw_trail`, as it would appear in the old Python API.
+
+```python
+  root_children_field = supervisor.getField(supervisor.getRoot(), "children")
+  root_children_field.importMFNodeFromString(-1, trail_plan)
+```
+
+And here is how that looks written in the new controller:
+
+```python
+  world.children.append(trail_plan)
+```
+
+The new API is mostly backwards-compatible with the old Python Webots API, and provides an option to display deprecation warnings with helpful advice for changing to the new API.
+
+The new Python API is planned for inclusion in an upcoming Webots release, to replace the old one.
+In the meantime, an early-access version is available, distributed under Apache 2.0 licence, the same permissibe open-source license that Webots is distributed under.
 
 Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 

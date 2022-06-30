@@ -64,7 +64,7 @@ Much of this new API was developed by the author in the course of teaching an in
 Before the Covid pandemic, this course had involved lab activities where students build and program physical robots.
 The pandemic forced these activities to become virtual.  Fortunately, Webots simulations actually have many advantages over physical robots, including not requiring any specialized hardware (beyond a decent personal computer), making much more interesting uses of altitude rather than having the robots confined to a safely flat surface, allowing robots to engage in dangerous or destructive activities that would be risky or expensive with physical hardware, allowing a much broader array of sensors including high-resolution cameras, and enabling full-fledged neural network and computational vision simulations.
 
-For example, an early activity in this class involves building Braitenburg-style vehicles that use light sensors and cameras to detect a lamp carried by a hovering drone, as well as ultrasound and touch sensors to detect obstables.
+For example, an early activity in this class involves building Braitenburg-style vehicles [Bra01] that use light sensors and cameras to detect a lamp carried by a hovering drone, as well as ultrasound and touch sensors to detect obstables.
 Using these sensors, the robots navigate towards the lamp in a cluttered playground sandbox that includes sloping sand, an exterior wall, and various obstacles including a puddle of water and platforms from which robots may fall.
 
 <video src="https://user-images.githubusercontent.com/19636109/176779241-cf439202-3339-45b2-a16b-4b076bd3eaa6.mp4" controls="controls" style = "max-width: 80%">
@@ -219,3 +219,26 @@ There are potential concerns about each of these measures of code readability, a
 Fortunately, most plausible measures of readability have been observed to be strongly correllated across ordinary cases, [Pos01] so the clear and unanimous agreement between these measures is a strong confirmation that the new API is indeed more readable.
 Other plausible measures of readability would take into account factors like whether the operands are ordinary English words, [Sca01] or how deeply nested (or indented) the code ends up being, [Hin01] both of which would also favor the new API.
 So the mathematics confirm what was likely obvious from visual comparison of code samples above, that the new API is indeed more "readable" than the old.
+
+## References.
+
+References
+==========
+
+[Bra01] Braitenberg, V. *Vehicles: Experiments in synthetic psychology.* Cambridge, MA: MIT Press. 1984.
+
+[Bus01] Buse, R and W Weimer. Learning a metric for code readability. *IEEE Transactions on Software Engineering*, 36(4): 546-58. 2010.
+
+[Hal01] Halstead, M. *Elements of software science.* Elsevier New York. 1977.
+
+[Hin01] Hindle, A, MW Godfrey and RC Holt. "Reading beside the lines: Indentation as a proxy for complexity metric." Program Comprehension. The 16th IEEE International Conference, 133-42. 2008.
+
+[McC01] McCabe, TJ. "A Complexity Measure" , 2(4): 308-320. 1976.
+
+[Mic01] Michel, O. "Webots: Professional Mobile Robot Simulation. *Journal of Advanced Robotics Systems.* 1(1): 39-42. 2004.
+
+[Oman01] Oman, P and J Hagemeister. "Metrics for assessing a software system's maintainability," *Proceedings Conference on Software Maintenance*, 337-44. 1992.
+
+[Pos01] Posnet, D, A Hindle and P Devanbu. "A simpler model of software readability." *Proceedings of the 8th working conference on mining software repositories*, 73-82. 2011.
+
+[Sca01] Scalabrino, S, M Linares-Vasquez, R Oliveto and D Poshyvanyk. "A Comprehensive Model for Code Readability." *Jounal of Software: Evolution and Process*, 1-29. 2017.

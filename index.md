@@ -5,7 +5,7 @@ Webots is a popular open-source package for 3D robotics simulations.
 It can also be used as a 3D interactive environment for other physics-based modeling, virtual reality, teaching or games. Webots has provided a simple API allowing Python programs to control robots and/or the simulated world, but this API is inefficient and does not provide many "pythonic" conveniences.
 A new Python API for Webots is presented that is more efficient and provides a more intuitive, easily usable, and "pythonic" interface.
 
-## About Webots
+## 1. About Webots
 
 Webots uses the Open Dynamics Engine (ODE), which allows physical simulations of Newtonian bodies, collisions, joints, springs, friction, and fluid dynamics.
 Webots provides the means to simulate a wide variety of robot components, including motors, actuators, wheels, treads, grippers, light sensors, ultrasound sensors, pressure sensors, range finders, radar, lidar, and cameras (with many of these sensors drawing their inputs from GPU processing of the simulation).
@@ -16,7 +16,7 @@ A simulated world typically involves a ground surface (which may be a sloping po
 <iframe width="560" height="315" src="https://www.youtube.com/embed/O7U3sX_ubGc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
-## Presenting a New Python API for Webots
+## 2. Presenting a New Python API for Webots
 
 In qualitative terms, the old API feels like one is awkwardly using Python to call C and C++ functions, whereas the new API feels much simpler, much easier, and like it is fully intended for Python.
 
@@ -32,8 +32,8 @@ In qualitative terms, the old API feels like one is awkwardly using Python to ca
 As another example illustrating how much easier the new API is to use, here are two lines from Webots' sample `supervisor_draw_trail`, as it would appear in the old Python API.
 
 ```python
-  root_children_field = supervisor.getField(supervisor.getRoot(), "children")
-  root_children_field.importMFNodeFromString(-1, trail_plan)
+  root_children = sup.getField(sup.getRoot(), "children")
+  root_children.importMFNodeFromString(-1, trail_plan)
 ```
 
 And here is how that looks written in the new controller:
@@ -47,22 +47,94 @@ The new API is mostly backwards-compatible with the old Python Webots API, and p
 The new Python API is planned for inclusion in an upcoming Webots release, to replace the old one.
 In the meantime, an early-access version is available, distributed under Apache 2.0 licence, the same permissibe open-source license that Webots is distributed under.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## 3. History and Motivation.
 
-```markdown
-Syntax highlighted code block
+Much of this new API was developed by the author in the course of teaching an interdisciplinary Southern Methodist University undergraduate Cognitive Science course entitled Minds, Brains and Robotics.
+Before the Covid pandemic, this course had involved lab activities where students build and program physical robots.
+The pandemic forced these activities to become virtual.  Fortunately, Webots simulations actually have many advantages over physical robots, including not requiring any specialized hardware (beyond a decent personal computer), making much more interesting uses of altitude rather than having the robots confined to a safely flat surface, allowing robots to engage in dangerous or destructive activities that would be risky or expensive with physical hardware, allowing a much broader array of sensors including high-resolution cameras, and enabling full-fledged neural network and computational vision simulations.
+For example, an early activity in this class involves building Braitenburg-style vehicles [Bra01]_ that use light sensors and cameras to detect a lamp carried by a hovering drone, as well as ultrasound and touch sensors to detect obstables.
+Using these sensors, the robots navigate towards the lamp in a cluttered playground sandbox that includes sloping sand, an exterior wall, and various obstacles including a puddle of water and platforms from which robots may fall.
 
-# Header 1
-## Header 2
-### Header 3
+This interdisciplinary class draws students with diverse backgrounds, and programming skills.
+Accomodating those with fewer skills required simplifying many of the complexities of the old Webots API.
+It also required setting up tools to use Webots "supervisor" powers to help manipulate the simulated world, e.g. to provide students easier customization options for their robots.
+The old Webots API makes the use of such supervisor powers tedious and difficult, even for experienced coders, so this practically required developing new tools to streamline the process.
+These factors led to the development of an interface that would be much easier for novice students to adapt to, and that would make it much easier for an experienced programmer to make much use of supervisor powers to manipulate the simulated world.
+Discussion of this with the core Webots development team then led to the decision to incorporate these improvements into Webots, where they can be of benefit to a much broader community.
 
-- Bulleted
-- List
+## 4. Design Decisions.
 
-1. Numbered
-2. List
+This section discusses some design decisions that arose in developing this API, and discusses the factors that drove these decisions.
+This may help give the reader a better understanding of this API, and also of relevant considerations that would arise in many other development scenarios.
 
-**Bold** and _Italic_ and `Code` text
+### 4.1. Shifting from functions to properties.
+The old Python API for Webots consists largely of methods like `motor.getVelocity()` and `motor.setVelocity(new_velocity)`.
+In the new API these have quite uniformly been changed to Python properties, so these purposes are now accomplished with :code:`motor.velocity` and :code:`motor.velocity = new_velocity`.
+
+Reduction of wordiness and punctuation helps to make programs easier to read and to understand, and it reduces the cognitive load on coders.
+However, there are also drawbacks.
+
+One drawback is that properties can give the mistaken impression that some attributes are computationally cheap to get or set.
+In cases where this impression would be misleading, more traditional method calls were retained and/or the comparative expense of the operation was clearly documented.
+
+Two other drawbacks are related.
+One is that inviting ordinary users to assign properties to API objects might lead them to assign other attributes that could cause problems.
+Since Python lacks true privacy protections, it has always faced this sort of worry, but this worry becomes even worse when users start to feel familiar moving beyond just using defined methods to interact with an object.
+
+Relatedly, Python debugging provides direct feedback in cases where a user misspells `motor.setFoo(v)` but not when someone mispells 'motor.foo = v`.  If a user inadvertently types `motor.setFool(v)` they will get an `AttributeError` noting that `motor` lacks a `setFool` attribute.
+But if a user inadvertently types `motor.fool = v`, then Python will silently create a new `.fool` attribute for `motor` and the user will often have no idea what has gone wrong.
+
+These two drawbacks both involve users setting an attribute they shouldn't: either an attribute that has another purpose, or one that doesn't.
+Defenses against the first include "hiding" important attributes behind a leading "_", or protecting them with a Python property, which can also help provide useful doc-strings.
+Unfortunately it's much harder to protect against misspellings in this piece-meal fashion.
+
+This led to the decision to have robot devices like motors and cameras employ a blanket `__setattr__` that will generate warnings if non-property attributes of devices are set from outside the module.
+So the user who inadvertently types `motor.fool = v` will immediately be warned of their mistake.
+This does incur a performance cost, but that cost is often worthwhile when it saves development time and frustration.
+For cases when performance is crucial, and/or a user wants to live dangerously and meddle inside API objects, this layer of protection can be deactivated.
+
+An alternative approach, suggested by Matthew Feickert, would have been to use `__slots__` rather than an ordinary `__dict__` to store device attributes, which would also have the effect of raising an error if users attempt to modify unexpected attributes.  Not having a `__dict__` can make it harder to do some things like cached properties and multiple inheritance.  But in cases where such issues don't arise or can be worked around, readers facing similar challenges may find `__slots__` to be a preferable solution.
+
+### 4.2 Backwards Compatibility.
+The new API offers many new ways of doing things, many of which would seem "better" by most metrics, with the main drawback being just that they differ from old ways.
+The possibility of making a clean break from the old API was considered, but that would stop old code from working, alienate veteran users, and risk causing a schism akin to the deep one that arose between Python 2 and Python 3 communities when Python 3 opted against backwards compatibility.
+
+Another option would have been to refrain from adding a "new-and-better" feature to avoid introducing redundancies or backward incompatibilities.
+But that has obvious drawbacks too.
+
+Instead, a compromise was typically adopted: to provide both the "new-and-better" way and the "worse-old" way.
+This redundancy was eased by shifting from `getFoo` / :code:`setFoo` methods to properties, and from `CamelCase` to pythonic :code:`snake_case`, which reduced the number of name collisions between old and new.
+Employing the "worse-old" way leads to a deprecation warning that includes helpful advice regarding shifting to the "new-and-better" way of doing things.
+This may help users to transition more gradually to the new ways, or they can shut these warnings off to help preserve good will, and hopefully avoid a schism.
+
+### 4.3 Separating `robot` and `world`.
+===============================================
+In Webots there is a distinction between "ordinary robots" whose capabilities are generally limited to using the robot's own devices, and "supervisor robots" who share those capabilities, but also have virtual omniscience and omnipotence over most aspects of the simulated world.
+In the old API, supervisor controller programs import a `Supervisor` subclass of `Robot`, but typically still call this unusually powerful robot `robot`, which has led to many confusions.
+
+In the new API these two sorts of powers are strictly separated.
+Importing `robot` provides an object that can be used to control the devices in the robot itself.
+Importing `world` provides an object that can be used to observe and enact changes anywhere in the simulated world (presuming that the controller has such permissions, of course).
+In many use cases, supervisor robots don't actually have bodies and devices of their own, and just use their supervisor powers incorporeally, so all they will need is `world`.
+In the case where a robot's controller wants to exert both forms of control, it can import both `robot` to control its own body, and `world` to control the rest of the world.
+
+This distinction helps to make things more intuitively clear.
+It also frees `world` from having all the properties and methods that `robot` has, which in turn reduces the risk of name-collisions as `world` takes on the role of serving as the root of the proxy scene tree.
+In the new API, `world.children` refers to the `children` field of the root of the scene tree which contains (almost) all of the simulated world, `world.WorldInfo` refers to one of these children, a `WorldInfo` node, and `world.ROBOT2` dynamically returns a node within the world whose Webots DEF-name is "ROBOT2".
+These uses of `world` would have been much less intuitive if users thought of `world` as being a special sort of robot, rather than as being their handle on controlling the simulated world.
+Other sorts of supervisor functionality also are very intuitively associated with `world`, like `world.save(filename)` to save the state of the simulated world, or `world.mode = 'PAUSE'`.
+
+Having `world.attributes` dynamically fetch nodes and fields from the scene tree did come with some drawbacks.
+There is a risk of name-collisions, though these are rare since Webots field-names are known in advance, and nodes are typically sought by ALL-CAPS DEF-names, which won't collide with `world` 's lower-case and MixedCase attributes.
+Linters like MyPy and PyCharm also cannot anticipate such dynamic references, which is unfortunate, but does not stop such dynamic references from being extremely useful.
+
+
+:
+:
+:
+
+
+
 
 [Link](url) and ![Image](src)
 ```

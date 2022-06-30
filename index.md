@@ -97,6 +97,7 @@ Our solution: Robot devices like motors and cameras employ a blanket `__setattr_
 An alternative solution:  use `__slots__` rather than an ordinary `__dict__` to store device attributes, which would also have the effect of raising an error if users attempt to modify unexpected attributes.  Not having a `__dict__` can make it harder to do some things like cached properties and multiple inheritance.  But in cases where such issues don't arise or can be worked around, readers facing similar challenges may find `__slots__` to be a preferable solution.
 
 ### 4.2 Backwards Compatibility.
+
 The new API offers many new ways of doing things, many of which would seem "better" by most metrics, with the main drawback being just that they differ from old ways.  We considered three options.
 
 1. **Make a clean break?** The possibility of making a clean break from the old API was considered, but that would stop old code from working, alienate veteran users, and risk causing a schism akin to the deep one that arose between Python 2 and Python 3 communities when Python 3 opted against backwards compatibility.
@@ -106,7 +107,7 @@ The new API offers many new ways of doing things, many of which would seem "bett
 3. **Compromise?** We usually opted to support both, but the "worse old" way generates (optional) deprecation warnings that provide guidance for shifting to the "new and better way". This involves (temporary) redundancy but hopefully will help ease the transition.
 
 ### 4.3 Separating `robot` and `world`.
-===============================================
+
 In Webots there is a distinction between "ordinary robots" whose capabilities are generally limited to using the robot's own devices, and "supervisor robots" who share those capabilities, but also have virtual omniscience and omnipotence over most aspects of the simulated world.
 In the old API, supervisor controller programs import a `Supervisor` subclass of `Robot`, but typically still call this unusually powerful robot `robot`, which has led to many confusions.
 
@@ -163,9 +164,12 @@ Webots provides this sample controller in C, but it was re-implemented using bot
   |Logical Lines of Code (single commands)                |  27         | 38           |
   |Cyclomatic Complexity                                  | 5 (Grade A) | 8 (Grade B)  |
 
-Some raw measures for the two controllers are shown in Table 1.
-These were gathered using the Radon code-analysis tools.
-Multiple metrics are reported because theorists disagree about which are most relevant in assessing code readability, because some of these play a role in computing other metrics discussed below, and because this may help to allay potential worries that a few favorable metrics might have been cherry-picked.
+Some raw measures for the two controllers are shown in Table 1. These were gathered using the Radon code-analysis tools.
+
+**Why are so many metrics reported?**
+1. because theorists disagree about which are most relevant in assessing code readability.
+2. because some of these play a role in computing other metrics discussed below
+3. because this may help to allay potential worries that a few favorable metrics might have been cherry-picked.
 
 The "lines of code" measures reflect that the new API makes it easier to do more things with less code.  Line counts can be misleading, especially when the code with fewer lines has longer lines, though upcoming measures will show that that is not the case here.
 
@@ -177,12 +181,11 @@ By Radon's reckoning this difference in complexity already gives the old API a "
 
 Another collection of classic measures of code readability was developed by Halstead. [Hal01]
 These measures (especially volume) have been shown to correlate with human assessments of code readability [Bus01] [Pos01].
-These measures generally penalize a program for using a "vocabulary" involving more operators and operands. Table :ref:`halsteadtable` shows these metrics, as computed by Radon.
-(Again all measures are reported, while remaining neutral about which are most significant.)
+These measures generally penalize a program for using a "vocabulary" involving more operators and operands. Table 2 shows these metrics, as computed by Radon.
+Again all measures are reported, while remaining neutral about which are most significant.
 The new API scores significantly lower/"better" on these metrics, due in large part to its automatically selecting among many different C-API calls without these needing to appear in the user's code.
 E.g. having `motor.velocity` as a unified property involves fewer unique names than having users write both `setVelocity()` and `getVelocity()`, and often forming a third local `velocity` variable.
 And having `world.children[-1]` access the last child that field in the simulation saves having to count `getField`, and `getMFNode` in the vocabulary, and often also saves forming additional local variables for nodes or fields gotten in this way.
-Both of these factors also help the new API to greatly reduce parentheses counts.
 
 **Table 2: Halstead Metrics.**
 
@@ -198,10 +201,8 @@ Both of these factors also help the new API to greatly reduce parentheses counts
 
 ### 5.3 Maintainability Index
 
-Lastly, the Maintainability Index and variants thereof are intended to measure of how easy to support and change source code is. [Oman01]
-These measures combine Halstead Volume, Source Lines of Code, and Cyclomatic Complexity, all mentioned above, and two variants (SEI and Radon) also provide credit for percentage of comment lines.
-Different versions of this measure weight and curve these factors somewhat differently, but since the new API outperforms the old on each factor, all versions agree that it gets the higher/"better" score, as shown in Table :ref:`maintaintable`.
-(These measures were computed based on the input components as counted by Radon.)
+The Maintainability Index and variants thereof are intended to measure of how easy to support and change source code is. [Oman01]
+Different versions of this measure weight and curve factors mentioned above somewhat differently, but since the new API outperforms the old on each factor, all versions agree that it gets the higher/"better" score, as shown in Table 3.  (These measures were computed based on the input components as counted by Radon.)
 
 **Table 3: Maintainability Index Metrics.**
 
@@ -212,15 +213,9 @@ Different versions of this measure weight and curve these factors somewhat diffe
   |Microsoft Visual Studio                                 |  52        |     46       |
   |Radon                                                   |  82        |     75       |
 
+### 5.4 Conclusions.
+
 There are potential concerns about each of these measures of code readability, and one can easily imagine playing a form of "code golf" to optimize some of these scores without actually improving readability (though it would be difficult to do this for all scores at once).
 Fortunately, most plausible measures of readability have been observed to be strongly correllated across ordinary cases, [Pos01] so the clear and unanimous agreement between these measures is a strong confirmation that the new API is indeed more readable.
 Other plausible measures of readability would take into account factors like whether the operands are ordinary English words, [Sca01] or how deeply nested (or indented) the code ends up being, [Hin01] both of which would also favor the new API.
-
 So the mathematics confirm what was likely obvious from visual comparison of code samples above, that the new API is indeed more "readable" than the old.
-
-5. Conclusions
-==============
-
-A new Python API for Webots robotic simulations was presented.
-It more efficiently interfaces directly with the Webots C API and provides a more intuitive, easily usable, and "pythonic" interface for controlling Webots robots and simulations.
-Motivations for the API and some of its design decisions were discussed.  Advantages of the new API were discussed and quantified using automated code readability metrics.

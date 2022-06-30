@@ -1,4 +1,3 @@
-# A New Python API for Webots Robotic Simulations
 ## Prof. Justin C. Fisher, Southern Methodist University
 
 Webots is a popular open-source package for 3D robotics simulations.
@@ -52,8 +51,10 @@ In the meantime, an early-access version is available, distributed under Apache 
 Much of this new API was developed by the author in the course of teaching an interdisciplinary Southern Methodist University undergraduate Cognitive Science course entitled Minds, Brains and Robotics.
 Before the Covid pandemic, this course had involved lab activities where students build and program physical robots.
 The pandemic forced these activities to become virtual.  Fortunately, Webots simulations actually have many advantages over physical robots, including not requiring any specialized hardware (beyond a decent personal computer), making much more interesting uses of altitude rather than having the robots confined to a safely flat surface, allowing robots to engage in dangerous or destructive activities that would be risky or expensive with physical hardware, allowing a much broader array of sensors including high-resolution cameras, and enabling full-fledged neural network and computational vision simulations.
-For example, an early activity in this class involves building Braitenburg-style vehicles [Bra01]_ that use light sensors and cameras to detect a lamp carried by a hovering drone, as well as ultrasound and touch sensors to detect obstables.
+For example, an early activity in this class involves building Braitenburg-style vehicles that use light sensors and cameras to detect a lamp carried by a hovering drone, as well as ultrasound and touch sensors to detect obstables.
 Using these sensors, the robots navigate towards the lamp in a cluttered playground sandbox that includes sloping sand, an exterior wall, and various obstacles including a puddle of water and platforms from which robots may fall.
+
+https://user-images.githubusercontent.com/19636109/176779241-cf439202-3339-45b2-a16b-4b076bd3eaa6.mp4
 
 This interdisciplinary class draws students with diverse backgrounds, and programming skills.
 Accomodating those with fewer skills required simplifying many of the complexities of the old Webots API.

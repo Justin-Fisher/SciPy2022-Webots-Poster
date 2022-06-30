@@ -55,7 +55,7 @@ The pandemic forced these activities to become virtual.  Fortunately, Webots sim
 For example, an early activity in this class involves building Braitenburg-style vehicles that use light sensors and cameras to detect a lamp carried by a hovering drone, as well as ultrasound and touch sensors to detect obstables.
 Using these sensors, the robots navigate towards the lamp in a cluttered playground sandbox that includes sloping sand, an exterior wall, and various obstacles including a puddle of water and platforms from which robots may fall.
 
-<video src="https://user-images.githubusercontent.com/19636109/176779241-cf439202-3339-45b2-a16b-4b076bd3eaa6.mp4">
+<video src="https://user-images.githubusercontent.com/19636109/176779241-cf439202-3339-45b2-a16b-4b076bd3eaa6.mp4" controls="controls">
 </video>
 
 This interdisciplinary class draws students with diverse backgrounds, and programming skills.

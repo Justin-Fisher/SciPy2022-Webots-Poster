@@ -24,7 +24,7 @@ A typical simulation will involve one or more robots, each with somewhere betwee
 A simulated world typically involves a ground surface (which may be a sloping polygon mesh) and dozens of walls, obstacles, and/or other objects, which may be stationary or moving in the physics simulation.
 
 <p align="center">
-<iframe width="560" height="315" src="https://www.youtube.com/embed/O7U3sX_ubGc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/O7U3sX_ubGc" title="Webots video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
 ## 2. Presenting a New Python API for Webots

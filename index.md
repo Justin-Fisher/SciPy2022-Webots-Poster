@@ -2,11 +2,11 @@
 ## Prof. Justin C. Fisher, Southern Methodist University
 
 ## Overview.
-**[Section 1.](#aboutwebots)** Webots is a popular open-source package for 3D robotics simulations.  It can also be used as a 3D interactive environment for other physics-based modeling, virtual reality, teaching or games. (See the first video below for an intro to Webots!)
+**[Section 1.](#aboutwebots)** Webots is a popular open-source package for 3D robotics simulations.  It can also be used as a 3D interactive environment for other physics-based modeling, virtual reality, teaching or games. (See the [first video](#aboutwebots) for an intro to Webots!)
 
-**[Section 2.](#new-api)** A new Python API for Webots is presented that is more efficient and provides a more intuitive, easily usable, and "pythonic" interface than the simple Python API that has historically been included with Webots.  (See the bullet-list below for some of the features and conveniences of this new API.)
+**[Section 2.](#new-api)** A new Python API for Webots is presented that is more efficient and provides a more intuitive, easily usable, and "pythonic" interface than the simple Python API that has historically been included with Webots.  (See the [bullet-list](#new-api) for some of the features and conveniences of this new API.)
 
-**[Section 3.](#history)** The history of this new API is presented including its development for an undergraduate Cognitive Science course called Minds, Brains, and Robotics.  (See the second video below of a fun robot race!)
+**[Section 3.](#history)** The history of this new API is presented including its development for an undergraduate Cognitive Science course called Minds, Brains, and Robotics.  (See the [second video](#history) of a fun robot race!)
 
 **[Section 4.](#design)** Some design decisions are discussed, which likely parallel challenges that other developers face.
 

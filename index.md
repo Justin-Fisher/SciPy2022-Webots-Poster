@@ -2,11 +2,15 @@
 ## Prof. Justin C. Fisher, Southern Methodist University
 
 ## Overview.
-1. Webots is a popular open-source package for 3D robotics simulations.  It can also be used as a 3D interactive environment for other physics-based modeling, virtual reality, teaching or games. (See the first video below for an intro to Webots!)
-2. A new Python API for Webots is presented that is more efficient and provides a more intuitive, easily usable, and "pythonic" interface than the simple Python API that has historically been included with Webots.  (See the bullet-list below for some of the features and conveniences of this new API.)
-3. The history of this new API is presented including its development for an undergraduate Cognitive Science course called Minds, Brains, and Robotics.  (See the second video below of a fun robot race!)
-4. Some design decisions are discussed, which likely parallel challenges that other developers face.
-5. Some readability metrics are provided to support the claim that the new API is much more readable than the old.  Across the board, code written in the new API receives "better" scores than equivalent code written in the old.
+**[Section 1.](#aboutwebots)** Webots is a popular open-source package for 3D robotics simulations.  It can also be used as a 3D interactive environment for other physics-based modeling, virtual reality, teaching or games. (See the first video below for an intro to Webots!)
+
+**[Section 2.](#new-api)** A new Python API for Webots is presented that is more efficient and provides a more intuitive, easily usable, and "pythonic" interface than the simple Python API that has historically been included with Webots.  (See the bullet-list below for some of the features and conveniences of this new API.)
+
+**[Section 3.](#history)** The history of this new API is presented including its development for an undergraduate Cognitive Science course called Minds, Brains, and Robotics.  (See the second video below of a fun robot race!)
+
+**[Section 4.](#design)** Some design decisions are discussed, which likely parallel challenges that other developers face.
+
+**[Section 5.](#metrics)** Some readability metrics are provided to support the claim that code written in the new API is more readable than equivalent code written in the old.
 
 ## Quick Links.
 
@@ -16,7 +20,7 @@
 
 **Contact:** fisher at smu dot edu
 
-## 1. About Webots
+## 1. About Webots <a name="aboutwebots"></a>
 
 Webots uses the Open Dynamics Engine (ODE), which allows physical simulations of Newtonian bodies, collisions, joints, springs, friction, and fluid dynamics.
 Webots provides the means to simulate a wide variety of robot components, including motors, actuators, wheels, treads, grippers, light sensors, ultrasound sensors, pressure sensors, range finders, radar, lidar, and cameras (with many of these sensors drawing their inputs from GPU processing of the simulation).
@@ -27,7 +31,7 @@ A simulated world typically involves a ground surface (which may be a sloping po
 <iframe width="560" height="315" src="https://www.youtube.com/embed/O7U3sX_ubGc" title="Webots video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </p>
 
-## 2. Presenting a New Python API for Webots
+## 2. Presenting a New Python API for Webots  <a name="new-api"></a>
 
 In qualitative terms, the old API feels like one is awkwardly using Python to call C and C++ functions, whereas the new API feels much simpler, much easier, and like it is fully intended for Python.
 
@@ -58,7 +62,7 @@ The new API is mostly backwards-compatible with the old Python Webots API, and p
 The new Python API is planned for inclusion in an upcoming Webots release, to replace the old one.
 In the meantime, an early-access version is available, distributed under Apache 2.0 licence, the same permissibe open-source license that Webots is distributed under.
 
-## 3. History and Motivation.
+## 3. History and Motivation. <a name="history"></a>
 
 Much of this new API was developed by the author in the course of teaching an interdisciplinary Southern Methodist University undergraduate Cognitive Science course entitled Minds, Brains and Robotics.
 Before the Covid pandemic, this course had involved lab activities where students build and program physical robots.
@@ -78,7 +82,7 @@ These factors led to the development of an interface that would be much easier f
 
 Discussion of this with the core Webots development team then led to the decision to incorporate these improvements into Webots, where they can be of benefit to a much broader community.
 
-## 4. Design Decisions.
+## 4. Design Decisions. <a name="design"></a>
 
 This section discusses some design decisions that arose in developing this API, and discusses the factors that drove these decisions.
 This may help give the reader a better understanding of this API, and also of relevant considerations that would arise in many other development scenarios.
@@ -127,7 +131,7 @@ Having `world.attributes` dynamically fetch nodes and fields from the scene tree
 There is a risk of name-collisions, though these are rare since Webots field-names are known in advance, and nodes are typically sought by ALL-CAPS DEF-names, which won't collide with `world` 's lower-case and MixedCase attributes.
 Linters like MyPy and PyCharm also cannot anticipate such dynamic references, which is unfortunate, but does not stop such dynamic references from being extremely useful.
 
-## 5. Readability Metrics
+## 5. Readability Metrics  <a name="metrics"></a>
 
 A main advantage of the new API is that it allows Webots controllers to be written in a manner that is easier for coders to read, write, and understand.
 Qualitatively, this difference becomes quite apparent upon a cursory inspection of examples like the one given in section 1.
